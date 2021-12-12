@@ -1,7 +1,7 @@
 const express = require("express")
 const exphbs = require("express-handlebars")
-const restaurantsData = require("./restaurant.json").results
 const mongoose = require('mongoose')
+const Restaurant = require("./models/Restaurant")
 
 const app = express()
 const port = 3000
@@ -23,8 +23,12 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }))
 app.set("view engine", "handlebars")
 app.use(express.static("public"))
 
+//首頁 瀏覽餐廳
 app.get("/", (req, res) => {
-  res.render("index", { restaurantsData })
+  Restaurant.find({})
+    .lean()
+    .then(restaurantsData => res.render("index", { restaurantsData }))
+    .catch(err => console.log(err))
 })
 
 app.get("/search", (req, res) => {
