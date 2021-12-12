@@ -31,6 +31,7 @@ app.get("/", (req, res) => {
     .catch(err => console.log(err))
 })
 
+//搜尋餐廳
 app.get("/search", (req, res) => {
   if (!req.query.keywords) {
     res.redirect("/")
@@ -39,22 +40,26 @@ app.get("/search", (req, res) => {
   const keywords = req.query.keywords
   const keyword = req.query.keywords.trim().toLowerCase()
 
-  const filterRestaurantsData = restaurantsData.filter(
-    data =>
-      data.name.toLowerCase().includes(keyword) ||
-      data.category.includes(keyword)
-  )
-
-  res.render("index", { restaurantsData: filterRestaurantsData, keywords })
+  Restaurant.find({})
+    .lean()
+    .then(restaurantsData => {
+      const filterRestaurantsData = restaurantsData.filter(
+        data =>
+          data.name.toLowerCase().includes(keyword) ||
+          data.category.includes(keyword)
+      )
+      res.render("index", { restaurantsData: filterRestaurantsData, keywords })
+    })
+    .catch(err => console.log(err))
 })
 
+//瀏覽餐廳詳情
 app.get("/restaurants/:restaurantId", (req, res) => {
   const { restaurantId } = req.params
-  const restaurantData = restaurantsData.find(
-    data => data.id === Number(restaurantId)
-
-  )
-  res.render("show", { restaurantData })
+  Restaurant.findById(restaurantId)
+    .lean()
+    .then(restaurantData => res.render("show", { restaurantData }))
+    .catch(err => console.log(err))
 })
 
 app.listen(port, () => {
